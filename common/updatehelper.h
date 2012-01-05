@@ -1,5 +1,3 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* vim:set ts=2 sw=2 sts=2 et cindent: */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -13,14 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
+ * The Original Code is common code between maintenanceservice and updater
  *
- * The Initial Developer of the Original Code is Google Inc.
- * Portions created by the Initial Developer are Copyright (C) 2005
+ * The Initial Developer of the Original Code is
+ * Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *  Darin Fisher <darin@meer.net>
+ *   Brian R. Bondy <netzen@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,29 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef PROGRESSUI_H__
-#define PROGRESSUI_H__
+BOOL LaunchWinPostProcess(const WCHAR *installationDir,
+                          const WCHAR *updateInfoDir, 
+                          bool forceSync,
+                          HANDLE userToken);
+BOOL StartServiceUpdate(int argc, LPWSTR *argv);
+BOOL GetUpdateDirectoryPath(LPWSTR path);
+DWORD LaunchServiceSoftwareUpdateCommand(DWORD argc, LPCWSTR *argv);
+BOOL WriteStatusFailure(LPCWSTR updateDirPath, int errorCode);
+BOOL WriteStatusPending(LPCWSTR updateDirPath);
+DWORD WaitForServiceStop(LPCWSTR serviceName, DWORD maxWaitSeconds);
+DWORD WaitForProcessExit(LPCWSTR filename, DWORD maxSeconds);
 
-#include "updatedefines.h"
-
-#if defined(XP_WIN)
-  typedef WCHAR NS_tchar;
-  #define NS_main wmain
-#else
-  typedef char NS_tchar;
-  #define NS_main main
-#endif
-
-// Called to perform any initialization of the widget toolkit
-int InitProgressUI(int *argc, NS_tchar ***argv);
-
-// Called on the main thread at startup
-int ShowProgressUI();
-
-// May be called from any thread
-void QuitProgressUI();
-
-// May be called from any thread: progress is a number between 0 and 100
-void UpdateProgressUI(float progress);
-
-#endif  // PROGRESSUI_H__
+#define SVC_NAME L"MozillaMaintenance"

@@ -1,5 +1,3 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* vim:set ts=2 sw=2 sts=2 et cindent: */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -13,14 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
+ * The Original Code is for Maintenance service path hashing 
  *
- * The Initial Developer of the Original Code is Google Inc.
- * Portions created by the Initial Developer are Copyright (C) 2005
+ * The Initial Developer of the Original Code is
+ * Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *  Darin Fisher <darin@meer.net>
+ *   Brian R. Bondy <netzen@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -29,36 +28,34 @@
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
  * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
+ * decision by deleting the provisions /PGM and replace them with the notice
  * and other provisions required by the GPL or the LGPL. If you do not delete
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef PROGRESSUI_H__
-#define PROGRESSUI_H__
+#ifndef _PATHHASH_H_
+#define _PATHHASH_H_
 
-#include "updatedefines.h"
+/**
+ * Converts a file path into a unique registry location for cert storage
+ *
+ * @param  filePath     The input file path to get a registry path from
+ * @param  registryPath A buffer to write the registry path to, must 
+ *                      be of size in WCHARs MAX_PATH + 1
+ * @return TRUE if successful
+*/
+BOOL CalculateRegistryPathFromFilePath(const LPCWSTR filePath, 
+                                       LPWSTR registryPath);
 
-#if defined(XP_WIN)
-  typedef WCHAR NS_tchar;
-  #define NS_main wmain
-#else
-  typedef char NS_tchar;
-  #define NS_main main
+// The test only fallback key, as its name implies, is only present on machines
+// that will use automated tests.  Since automated tests always run from a 
+// different directory for each test, the presence of this key bypasses the
+// "This is a valid installation directory" check.  This key also stores
+// the allowed name and issuer for cert checks so that the cert check
+// code can still be run unchanged.
+#define TEST_ONLY_FALLBACK_KEY_PATH \
+  L"SOFTWARE\\Mozilla\\MaintenanceService\\3932ecacee736d366d6436db0f55bce4"
+
 #endif
-
-// Called to perform any initialization of the widget toolkit
-int InitProgressUI(int *argc, NS_tchar ***argv);
-
-// Called on the main thread at startup
-int ShowProgressUI();
-
-// May be called from any thread
-void QuitProgressUI();
-
-// May be called from any thread: progress is a number between 0 and 100
-void UpdateProgressUI(float progress);
-
-#endif  // PROGRESSUI_H__
