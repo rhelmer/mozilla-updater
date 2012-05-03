@@ -11,15 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is common code between maintenanceservice and updater
+ * The Original Code is mozilla.org code.
  *
  * The Initial Developer of the Original Code is
- * Mozilla Foundation.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * the Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Brian R. Bondy <netzen@gmail.com>
+ *   Brian R. Bondy <netzen@gmail.com> (Original Author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -33,20 +33,33 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK ***** */
+ * ***** END LICENSE BLOCK *****
+ */
 
-BOOL LaunchWinPostProcess(const WCHAR *installationDir,
-                          const WCHAR *updateInfoDir, 
-                          bool forceSync,
-                          HANDLE userToken);
-BOOL StartServiceUpdate(int argc, LPWSTR *argv);
-BOOL GetUpdateDirectoryPath(LPWSTR path);
-DWORD LaunchServiceSoftwareUpdateCommand(int argc, LPCWSTR *argv);
-BOOL WriteStatusFailure(LPCWSTR updateDirPath, int errorCode);
-BOOL WriteStatusPending(LPCWSTR updateDirPath);
-DWORD WaitForServiceStop(LPCWSTR serviceName, DWORD maxWaitSeconds);
-DWORD WaitForProcessExit(LPCWSTR filename, DWORD maxSeconds);
-BOOL DoesFallbackKeyExist();
-BOOL IsLocalFile(LPCWSTR file, BOOL &isLocal);
+/* Test version downgrade MAR security check */
 
-#define SVC_NAME L"MozillaMaintenance"
+const TEST_ID = "0113";
+
+// We don't actually care if the MAR has any data, we only care about the
+// application return code and update.status result.
+const TEST_FILES = [];
+
+const VERSION_DOWNGRADE_ERROR = "23";
+
+function run_test() {
+  // Setup an old version MAR file
+  do_register_cleanup(cleanupUpdaterTest);
+  setupUpdaterTest(MAR_OLD_VERSION_FILE);
+
+  // Apply the MAR
+  let exitValue = runUpdate();
+  logTestInfo("testing updater binary process exitValue for failure when " +
+              "applying a version downgrade MAR");
+  // Make sure the updater executed successfully
+  do_check_eq(exitValue, 0);
+  let updatesDir = do_get_file(TEST_ID + UPDATES_DIR_SUFFIX);
+
+  //Make sure we get a version downgrade error
+  let updateStatus = readStatusFile(updatesDir);
+  do_check_eq(updateStatus.split(": ")[1], VERSION_DOWNGRADE_ERROR);
+}
